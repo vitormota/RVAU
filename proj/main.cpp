@@ -39,6 +39,8 @@ int openWebcam(){
 		Mat dst;
 		binarizeImage(frame,dst);
 		imshow("Binary", dst);
+		vector<KeyPoint> keyPoints;
+		findBlobs(frame, keyPoints);
 
 		if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
 		{
