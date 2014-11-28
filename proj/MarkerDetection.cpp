@@ -20,14 +20,36 @@ void binarizeImage(Mat img, Mat &dst){
 }
 
 void findBlobs(Mat img, vector<KeyPoint> &keyPoints){
-	Mat out;
+	Mat out, binary, mask;
+
+	binarizeImage(img, binary);
 
 	SimpleBlobDetector detector(getBlobDetectorParams());
 
-	detector.detect( img, keyPoints );
+	detector.detect( binary, keyPoints );
 	drawKeypoints( img, keyPoints, out, CV_RGB(0,255,0), DrawMatchesFlags::DEFAULT);
 
-	imshow( "out", out );
+	
+	
+	
+	for( int i=0; i < keyPoints.size(); i++){
+		KeyPoint keyPoint = keyPoints.at(i);
+	
+		mask = Mat::zeros(binary.rows+2, binary.cols+2,CV_8U);	
+
+		for( int j=0; j < 10; j++){
+				
+			int x = keyPoint.pt.x + (rand() % (int)keyPoint.size) - (keyPoint.size / 2 );
+			int y = keyPoint.pt.y + (rand() % (int)keyPoint.size) - (keyPoint.size / 2 );
+		
+			floodFill(binary, mask, keyPoints.at(i).pt, 255, 0, Scalar(), Scalar(), 4+(255<<8)+FLOODFILL_MASK_ONLY);
+		}
+		findBlobsContours(mask);
+		//imshow("mask", mask);
+	}
+
+	
+	
 }
 
 void findBlobsContours(cv::Mat img){
@@ -36,18 +58,18 @@ void findBlobsContours(cv::Mat img){
 
 	Mat dst = Mat::zeros(img.rows, img.cols, CV_8UC3);
 
-    findContours( img, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE );
+    findContours( img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE );
 
 	// iterate through all the top-level contours,
     // draw each connected component with its own random color
     int idx = 0;
-    for( ; idx >= 0; idx = hierarchy[idx][0] )
+	for( idx =0 ; idx < contours.size(); idx++ )
     {
         Scalar color( rand()&255, rand()&255, rand()&255 );
-        drawContours( dst, contours, idx, color, CV_FILLED, 8, hierarchy );
+        drawContours( dst, contours, idx, color, 1, 8, hierarchy );
     }
 
-	imshow("Components", dst);
+	imshow("mask", dst);
 }
 
 SimpleBlobDetector::Params getBlobDetectorParams(){
@@ -55,7 +77,9 @@ SimpleBlobDetector::Params getBlobDetectorParams(){
 	params.filterByCircularity=false;
 	params.filterByConvexity=false;
 	params.filterByInertia=false;
-	params.filterByColor=false;
+
+	params.filterByColor=true;
+	params.blobColor=255;
 
 	params.filterByArea=true;
 	params.minArea=50;
