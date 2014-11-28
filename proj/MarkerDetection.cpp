@@ -28,8 +28,6 @@ void findBlobs(Mat img, vector<KeyPoint> &keyPoints){
 
 	detector.detect( binary, keyPoints );
 	drawKeypoints( img, keyPoints, out, CV_RGB(0,255,0), DrawMatchesFlags::DEFAULT);
-
-	
 	
 	
 	for( int i=0; i < keyPoints.size(); i++){
@@ -38,18 +36,12 @@ void findBlobs(Mat img, vector<KeyPoint> &keyPoints){
 		mask = Mat::zeros(binary.rows+2, binary.cols+2,CV_8U);	
 
 		for( int j=0; j < 10; j++){
-				
-			int x = keyPoint.pt.x + (rand() % (int)keyPoint.size) - (keyPoint.size / 2 );
-			int y = keyPoint.pt.y + (rand() % (int)keyPoint.size) - (keyPoint.size / 2 );
-		
-			floodFill(binary, mask, keyPoints.at(i).pt, 255, 0, Scalar(), Scalar(), 4+(255<<8)+FLOODFILL_MASK_ONLY);
+			int x = keyPoint.pt.x + (rand() % (int)keyPoint.size * PERCENTAGE_SIZE) - (keyPoint.size * PERCENTAGE_SIZE / 2 );
+			int y = keyPoint.pt.y + (rand() % (int)keyPoint.size * PERCENTAGE_SIZE) - (keyPoint.size * PERCENTAGE_SIZE / 2 );
+			floodFill(binary, mask, Point(x,y), 255, 0, Scalar(), Scalar(), 4+(255<<8)+FLOODFILL_MASK_ONLY);	
 		}
 		findBlobsContours(mask);
-		//imshow("mask", mask);
 	}
-
-	
-	
 }
 
 void findBlobsContours(cv::Mat img){
@@ -68,8 +60,6 @@ void findBlobsContours(cv::Mat img){
         Scalar color( rand()&255, rand()&255, rand()&255 );
         drawContours( dst, contours, idx, color, 1, 8, hierarchy );
     }
-
-	imshow("mask", dst);
 }
 
 SimpleBlobDetector::Params getBlobDetectorParams(){
