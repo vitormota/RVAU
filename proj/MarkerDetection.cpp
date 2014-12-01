@@ -8,6 +8,11 @@ using namespace cv;
 
 SimpleBlobDetector::Params getBlobDetectorParams();
 
+#define PI 3.14159265
+
+//5 degrees
+const double errorDegree = 2.5 * PI / 180;
+
 void binarizeImage(Mat img, Mat &dst){
 	Mat img_gray = img;
 
@@ -83,6 +88,14 @@ void calculateFarthestPoints(Point begin, Point end, vector<Point> points, Point
 	}
 }
 
+double calculateDerivative(Point begin, Point end){
+	Point rect = end-begin;
+	if( rect.x == 0 )
+		return 99999999;
+	else
+		return (double)rect.y / (double) rect.x;
+}
+
 void findBlobsContours(cv::Mat img){
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
@@ -96,20 +109,34 @@ void findBlobsContours(cv::Mat img){
 		//drawContours( dst, contours, i, color, 1, 8, hierarchy );
 
 		Point start =contours[i][0], end = contours[i][contours[i].size()/2];
-		
+
 		Point vertice1, vertice2;
 		calculateFarthestPoints(start,end,contours[i],vertice1,vertice2);
 
-		//circle(dst,vertice1,5,Scalar(0,0,255));
-		//circle(dst,vertice2,5,Scalar(255,0,0));
-
 		Point vertice3,vertice4;
 		calculateFarthestPoints(vertice1,vertice2,contours[i],vertice3,vertice4);
-		//circle(dst,vertice3,5,Scalar(0,0,255));
-		//circle(dst,vertice4,5,Scalar(255,0,0));
+
+		//m(Rect1) +/- = m(Rect3)
+		double mRect1 = calculateDerivative(vertice1,vertice3);
+		double mRect3 = calculateDerivative(vertice2,vertice4);
+		//m(Rect2) +/- = m(Rect4)
+		double mRect2 = calculateDerivative(vertice1,vertice4);
+		double mRect4 = calculateDerivative(vertice2,vertice3);
+
+
+		if( atan(mRect1) + errorDegree > atan(mRect3) && atan(mRect1) - errorDegree < atan(mRect3) &&
+			atan(mRect2) + errorDegree > atan(mRect4) && atan(mRect2) - errorDegree < atan(mRect3)){
+			
+			line(dst,vertice1,vertice3,Scalar(255,0,0),1); //Rect1
+			line(dst,vertice1,vertice4,Scalar(0,0,255),1); //Rect2
+			line(dst,vertice2,vertice4,Scalar(255,0,0),1); //Rect3
+			line(dst,vertice2,vertice3,Scalar(0,0,255),1); //Rect4
+
+			imshow("points", dst);
+			waitKey();
+		}
 	}
-	//imshow("points", dst);
-	//waitKey();
+	
 }
 
 SimpleBlobDetector::Params getBlobDetectorParams(){
