@@ -30,6 +30,8 @@ void verifySeedPoint(int &x, int &y, Mat img){
 		y=img.rows-1;
 }
 
+
+
 void findBlobs(Mat img, vector<KeyPoint> &keyPoints){
 	Mat out, binary, mask;
 
@@ -66,6 +68,21 @@ double distanceToLine(Point begin, Point end, Point x){
 	return area / sqrt(end.x*end.x + end.y * end.y );
 }
 
+void calculateFarthestPoints(Point begin, Point end, vector<Point> points, Point &maxPoint, Point &minPoint){
+	double max=0, min=0;
+	for(int i=0; i < points.size(); i++){
+		Point p = points[i];
+		double d = distanceToLine(begin,end,p);
+		if( d > max ){
+			max = d;
+			maxPoint = p;
+		}else if( d < min ){
+			min = d;
+			minPoint = p;
+		}
+	}
+}
+
 void findBlobsContours(cv::Mat img){
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
@@ -75,33 +92,24 @@ void findBlobsContours(cv::Mat img){
 	findContours( img, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
 
 	for( int i=0; i < contours.size(); i++ ){
-		Scalar color( rand()&255, rand()&255, rand()&255 );
-		drawContours( dst, contours, i, color, 1, 8, hierarchy );
+		//Scalar color( rand()&255, rand()&255, rand()&255 );
+		//drawContours( dst, contours, i, color, 1, 8, hierarchy );
+
 		Point start =contours[i][0], end = contours[i][contours[i].size()/2];
-		cout << "Starting Point: " << start << ", Ending Point: " << end << endl;
-		line(dst,start,end,color,1);
-		double max =0, min=0;
-		Point maxPoint, minPoint;
-		for(int j=1; j < contours[i].size(); j++ ){
-			Point p = contours[i][j];
-			double d = distanceToLine(start,end,p);
-			if( d > max ){
-				max = d;
-				maxPoint = p;
-			}else if( d < min ){
-				min = d;
-				minPoint = p;
-			}
-		}
+		
+		Point vertice1, vertice2;
+		calculateFarthestPoints(start,end,contours[i],vertice1,vertice2);
 
-		circle(dst,maxPoint,5,Scalar(0,0,255));
-		circle(dst,minPoint,5,Scalar(255,0,0));
+		//circle(dst,vertice1,5,Scalar(0,0,255));
+		//circle(dst,vertice2,5,Scalar(255,0,0));
+
+		Point vertice3,vertice4;
+		calculateFarthestPoints(vertice1,vertice2,contours[i],vertice3,vertice4);
+		//circle(dst,vertice3,5,Scalar(0,0,255));
+		//circle(dst,vertice4,5,Scalar(255,0,0));
 	}
-
-	cout << "Contours size: " << contours.size() << endl;
-
-	imshow("contours", dst);
-	waitKey();
+	//imshow("points", dst);
+	//waitKey();
 }
 
 SimpleBlobDetector::Params getBlobDetectorParams(){
