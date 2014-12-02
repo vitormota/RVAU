@@ -1,4 +1,5 @@
 #include "MarkerDetection.h"
+#include "BlobDetection.h"
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 
@@ -36,11 +37,12 @@ int openWebcam(){
 		}
 		imshow("MyVideo", frame); //show the frame in "MyVideo" window
 
-		Mat dst;
+		/*Mat dst;
 		binarizeImage(frame,dst);
-		imshow("Binary", dst);
+		imshow("Binary", dst);*/
 		vector<KeyPoint> keyPoints;
 		findBlobs(frame, keyPoints);
+		//imshow("TwoPass", twoPass(frame,CONNECTIVITY_8));
 
 		if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
 		{

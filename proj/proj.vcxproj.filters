@@ -24,9 +24,15 @@
     <ClCompile Include="blob.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BlobDetection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MarkerDetection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BlobDetection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

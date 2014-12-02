@@ -11,7 +11,7 @@ SimpleBlobDetector::Params getBlobDetectorParams();
 #define PI 3.14159265
 
 //5 degrees
-const double errorDegree = 2.5 * PI / 180;
+const double errorDegree = 10 * PI / 180;
 
 void binarizeImage(Mat img, Mat &dst){
 	Mat img_gray = img;
@@ -46,7 +46,7 @@ void findBlobs(Mat img, vector<KeyPoint> &keyPoints){
 
 	detector.detect( binary, keyPoints );
 	drawKeypoints( img, keyPoints, out, CV_RGB(0,255,0), DrawMatchesFlags::DEFAULT);
-
+	imshow("keypoints", out);
 
 	for( int i=0; i < keyPoints.size(); i++){
 		KeyPoint keyPoint = keyPoints.at(i);
@@ -96,6 +96,30 @@ double calculateDerivative(Point begin, Point end){
 		return (double)rect.y / (double) rect.x;
 }
 
+void getSize(Point v1, Point v2, Point v3, Point v4, int &height, int &width){
+	int maxDx =0, maxDy=0;
+	maxDx=max(abs(v1.x-v2.x),maxDx);
+	maxDy=max(abs(v1.y-v2.y),maxDy);
+
+	maxDx=max(abs(v1.x-v3.x),maxDx);
+	maxDy=max(abs(v1.y-v3.y),maxDy);
+
+	maxDx=max(abs(v1.x-v4.x),maxDx);
+	maxDy=max(abs(v1.y-v4.y),maxDy);
+
+	maxDx=max(abs(v2.x-v3.x),maxDx);
+	maxDy=max(abs(v2.y-v3.y),maxDy);
+
+	maxDx=max(abs(v2.x-v4.x),maxDx);
+	maxDy=max(abs(v2.y-v4.y),maxDy);
+
+	maxDx=max(abs(v4.x-v3.x),maxDx);
+	maxDy=max(abs(v4.y-v3.y),maxDy);
+
+	height = maxDx;
+	width = maxDy;
+}
+
 void findBlobsContours(cv::Mat img){
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
@@ -123,17 +147,19 @@ void findBlobsContours(cv::Mat img){
 		double mRect2 = calculateDerivative(vertice1,vertice4);
 		double mRect4 = calculateDerivative(vertice2,vertice3);
 
+		int widthElement, heightElement;
+		getSize(vertice1,vertice2,vertice3,vertice4,widthElement,heightElement);
 
 		if( atan(mRect1) + errorDegree > atan(mRect3) && atan(mRect1) - errorDegree < atan(mRect3) &&
-			atan(mRect2) + errorDegree > atan(mRect4) && atan(mRect2) - errorDegree < atan(mRect3)){
-			
+			atan(mRect2) + errorDegree > atan(mRect4) && atan(mRect2) - errorDegree < atan(mRect4) &&
+			( widthElement < img.size().width * 0.9 || heightElement < img.size().height * 0.9)){
+
 			line(dst,vertice1,vertice3,Scalar(255,0,0),1); //Rect1
 			line(dst,vertice1,vertice4,Scalar(0,0,255),1); //Rect2
 			line(dst,vertice2,vertice4,Scalar(255,0,0),1); //Rect3
 			line(dst,vertice2,vertice3,Scalar(0,0,255),1); //Rect4
 
 			imshow("points", dst);
-			waitKey();
 		}
 	}
 	

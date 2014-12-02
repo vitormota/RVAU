@@ -82,10 +82,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="blob.cpp" />
+    <ClCompile Include="BlobDetection.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MarkerDetection.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BlobDetection.h" />
     <ClInclude Include="MarkerDetection.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
