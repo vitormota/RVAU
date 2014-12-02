@@ -61,7 +61,7 @@ void findBlobs(Mat img, vector<KeyPoint> &keyPoints){
 
 			floodFill(binary, mask, Point(x,y), 255, 0, Scalar(), Scalar(), 4+(255<<8)+FLOODFILL_MASK_ONLY);	
 		}
-		findBlobsContours(mask);
+		findBlobsContours(mask,img);
 	}
 }
 
@@ -120,7 +120,7 @@ void getSize(Point v1, Point v2, Point v3, Point v4, int &height, int &width){
 	width = maxDy;
 }
 
-void findBlobsContours(cv::Mat img){
+void findBlobsContours(Mat img, Mat colorImage){
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
 
@@ -159,6 +159,24 @@ void findBlobsContours(cv::Mat img){
 			line(dst,vertice2,vertice4,Scalar(255,0,0),1); //Rect3
 			line(dst,vertice2,vertice3,Scalar(0,0,255),1); //Rect4
 
+			vector<Point2f> srcPoints;
+			srcPoints.push_back(vertice1);
+			srcPoints.push_back(vertice3);
+			srcPoints.push_back(vertice2);
+			srcPoints.push_back(vertice4);
+
+			vector<Point2f> dstPoints;
+			dstPoints.push_back(Point2f(0,0));
+			dstPoints.push_back(Point2f(200,0));
+			dstPoints.push_back(Point2f(200,200));
+			dstPoints.push_back(Point2f(0,200));
+
+			Mat homo = findHomography(srcPoints,dstPoints);
+			Mat warpHomo;
+
+			warpPerspective(colorImage,warpHomo,homo,Size(200,200));
+
+			imshow("Homo", warpHomo);
 			imshow("points", dst);
 		}
 	}
