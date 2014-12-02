@@ -369,6 +369,7 @@ bool runCalibrationAndSave(CameraSettings& s, Size imageSize, Mat&  cameraMatrix
 
 int main(int argc, char* argv[])
 {
+	initMarkerDatabase();
 	CameraSettings s;
 	const string inputSettingsFile = argc > 1 ? argv[1] : "default.xml";
 	FileStorage fs(inputSettingsFile, FileStorage::READ); // Read the settings
