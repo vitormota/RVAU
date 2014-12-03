@@ -13,6 +13,21 @@ SimpleBlobDetector::Params getBlobDetectorParams();
 //5 degrees
 const double errorDegree = 10 * PI / 180;
 
+vector<Mat> markers;
+vector<Point2f> dstPoints;
+
+void initMarkerDatabase(){
+	markers.push_back(imread("marca1.png",CV_LOAD_IMAGE_GRAYSCALE));
+	markers.push_back(imread("marca2.png",CV_LOAD_IMAGE_GRAYSCALE));
+	markers.push_back(imread("marca3.png",CV_LOAD_IMAGE_GRAYSCALE));
+	markers.push_back(imread("marca4.png",CV_LOAD_IMAGE_GRAYSCALE));
+
+	dstPoints.push_back(Point2f(0,0));
+	dstPoints.push_back(Point2f(32,0));
+	dstPoints.push_back(Point2f(32,32));
+	dstPoints.push_back(Point2f(0,32));
+}
+
 void binarizeImage(Mat img, Mat &dst){
 	Mat img_gray = img;
 
@@ -53,7 +68,7 @@ void findBlobs(Mat img, vector<KeyPoint> &keyPoints){
 
 		mask = Mat::zeros(binary.rows+2, binary.cols+2,CV_8U);	
 
-		for( int j=0; j < 10; j++){
+		for( int j=0; j < FLOODFILL_ITERATIONS; j++){
 			int x = keyPoint.pt.x + (rand() % (int)keyPoint.size * PERCENTAGE_SIZE) - (keyPoint.size * PERCENTAGE_SIZE / 2 );
 			int y = keyPoint.pt.y + (rand() % (int)keyPoint.size * PERCENTAGE_SIZE) - (keyPoint.size * PERCENTAGE_SIZE / 2 );
 
@@ -61,7 +76,7 @@ void findBlobs(Mat img, vector<KeyPoint> &keyPoints){
 
 			floodFill(binary, mask, Point(x,y), 255, 0, Scalar(), Scalar(), 4+(255<<8)+FLOODFILL_MASK_ONLY);	
 		}
-		findBlobsContours(mask,img);
+		findBlobsContours(mask,binary);
 	}
 }
 
@@ -160,23 +175,34 @@ void findBlobsContours(Mat img, Mat colorImage){
 			line(dst,vertice2,vertice3,Scalar(0,0,255),1); //Rect4
 
 			vector<Point2f> srcPoints;
-			srcPoints.push_back(vertice1);
-			srcPoints.push_back(vertice3);
 			srcPoints.push_back(vertice2);
 			srcPoints.push_back(vertice4);
-
-			vector<Point2f> dstPoints;
-			dstPoints.push_back(Point2f(0,0));
-			dstPoints.push_back(Point2f(200,0));
-			dstPoints.push_back(Point2f(200,200));
-			dstPoints.push_back(Point2f(0,200));
+			srcPoints.push_back(vertice1);
+			srcPoints.push_back(vertice3);
 
 			Mat homo = findHomography(srcPoints,dstPoints);
 			Mat warpHomo;
 
-			warpPerspective(colorImage,warpHomo,homo,Size(200,200));
+			warpPerspective(colorImage,warpHomo,homo,Size(32,32));
 
-			imshow("Homo", warpHomo);
+			for(int m=0; m < markers.size();m++){
+				Mat compare;
+				bitwise_xor(warpHomo,markers[m],compare);
+				int white=0;
+				for(int y=0; y < compare.size().height; y++){
+					for(int x=0; x < compare.size().width; x++){
+						if( compare.at<uchar>(y,x) == 0 ){
+							white++;
+						}
+					}
+				}
+
+				if( white >= 32*32*0.9 ){
+					imshow("Homo", warpHomo);
+					break;
+				}
+			
+			}
 			imshow("points", dst);
 		}
 	}
