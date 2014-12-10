@@ -128,6 +128,15 @@ public:
 		}
 		atImageList = 0;
 
+		FileStorage fs(outputFileName, FileStorage::READ);
+		if (fs.isOpened())
+		{
+			loadCameraParams(fs);
+		}
+
+	}
+	void loadCameraParams(FileStorage& fs){
+		
 	}
 	Mat nextImage()
 	{
@@ -181,6 +190,8 @@ public:
 	InputType inputType;
 	bool goodInput;
 	int flag;
+	Mat cameraMatrix;
+	Mat distCoeffs;
 
 private:
 	string patternToUse;
@@ -389,12 +400,13 @@ int main(int argc, char* argv[])
 	}
 
 	vector<vector<Point2f> > imagePoints;
-	Mat cameraMatrix, distCoeffs;
 	Size imageSize;
 	int mode = s.inputType == CameraSettings::IMAGE_LIST ? CAPTURING : DETECTION;
 	clock_t prevTimestamp = 0;
 	const Scalar RED(0, 0, 255), GREEN(0, 255, 0);
 	const char ESC_KEY = 27;
+
+
 
 	for (int i = 0;; ++i)
 	{
@@ -406,7 +418,7 @@ int main(int argc, char* argv[])
 		//-----  If no more image, or got enough, then stop calibration and show result -------------
 		if (mode == CAPTURING && imagePoints.size() >= (unsigned)s.nrFrames)
 		{
-			if (runCalibrationAndSave(s, imageSize, cameraMatrix, distCoeffs, imagePoints))
+			if (runCalibrationAndSave(s, imageSize, s.cameraMatrix, s.distCoeffs, imagePoints))
 				mode = CALIBRATED;
 			else
 				mode = DETECTION;
@@ -414,7 +426,7 @@ int main(int argc, char* argv[])
 		if (view.empty())          // If no more images then run calibration, save and stop loop.
 		{
 			if (imagePoints.size() > 0)
-				runCalibrationAndSave(s, imageSize, cameraMatrix, distCoeffs, imagePoints);
+				runCalibrationAndSave(s, imageSize, s.cameraMatrix, s.distCoeffs, imagePoints);
 			break;
 		}
 
@@ -467,7 +479,7 @@ int main(int argc, char* argv[])
 
 		//----------------------------- Output Text ------------------------------------------------
 		string msg = (mode == CAPTURING) ? "100/100" :
-			mode == CALIBRATED ? "Calibrated" : "Press 'g' to start";
+			mode == CALIBRATED ? "Calibrated! Press 'g' to recalibrate" : "Press 'g' to start";
 		int baseLine = 0;
 		Size textSize = getTextSize(msg, 1, 1, 1, &baseLine);
 		Point textOrigin(view.cols - 2 * textSize.width - 10, view.rows - 2 * baseLine - 10);
@@ -489,11 +501,11 @@ int main(int argc, char* argv[])
 		if (mode == CALIBRATED && s.showUndistorsed)
 		{
 			Mat temp = view.clone();
-			undistort(temp, view, cameraMatrix, distCoeffs);
+			undistort(temp, view, s.cameraMatrix, s.distCoeffs);
 		}
 
 		//------------------------------ Show image and check for input commands -------------------
-		imshow("Image View", view);
+		//imshow("Image View", view);
 		char key = (char)waitKey(s.inputCapture.isOpened() ? 50 : s.delay);
 
 		if (key == ESC_KEY)
@@ -519,8 +531,8 @@ int main(int argc, char* argv[])
 	if (s.inputType == CameraSettings::IMAGE_LIST && s.showUndistorsed)
 	{
 		Mat view, rview, map1, map2;
-		initUndistortRectifyMap(cameraMatrix, distCoeffs, Mat(),
-			getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, imageSize, 1, imageSize, 0),
+		initUndistortRectifyMap(s.cameraMatrix, s.distCoeffs, Mat(),
+			getOptimalNewCameraMatrix(s.cameraMatrix, s.distCoeffs, imageSize, 1, imageSize, 0),
 			imageSize, CV_16SC2, map1, map2);
 
 		for (int i = 0; i < (int)s.imageList.size(); i++)
