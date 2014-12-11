@@ -2,7 +2,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 
-#define cam 1
+#define cam 0
 
 using namespace std;
 using namespace cv;
