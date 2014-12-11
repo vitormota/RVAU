@@ -72,20 +72,27 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(OPENCV_DIR)\..\..\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(OPENCV_DIR)\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_core249.lib;opencv_calib3d249.lib;opencv_features2d249.lib;opencv_highgui249.lib;opencv_imgproc249.lib;opencv_nonfree249.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="blob.cpp" />
+    <ClCompile Include="BlobDetection.cpp" />
+    <ClCompile Include="HomographyHelper.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MarkerDetection.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BlobDetection.h" />
+    <ClInclude Include="HomographyHelper.h" />
     <ClInclude Include="MarkerDetection.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
