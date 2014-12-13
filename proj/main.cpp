@@ -41,7 +41,7 @@ public:
 	}
 	void read(const FileNode& node)                          //Read serialization for this class
 	{
-		
+
 		node["BoardSize_Width"] >> boardSize.width;
 		node["BoardSize_Height"] >> boardSize.height;
 		node["Calibrate_Pattern"] >> patternToUse;
@@ -136,7 +136,7 @@ public:
 
 	}
 	void loadCameraParams(FileStorage& fs){
-		
+
 	}
 	Mat nextImage()
 	{
@@ -383,6 +383,7 @@ int main(int argc, char* argv[])
 {
 	initMarkerDatabase();
 	CameraSettings s;
+	int mode;
 	const string inputSettingsFile = argc > 1 ? argv[1] : "default.xml";
 	FileStorage fs(inputSettingsFile, FileStorage::READ); // Read the settings
 	if (!fs.isOpened())
@@ -399,9 +400,21 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
+	const string parameterSettingsFile = argc > 2 ? argv[2] : "camera_params.xml";
+	FileStorage ps(parameterSettingsFile, FileStorage::READ);
+	if (ps.isOpened()){
+		ps["Camera_Matrix"] >> s.cameraMatrix;
+		ps["Distortion_Coefficients"] >> s.distCoeffs;
+		mode = CALIBRATED;
+	}
+	else {
+		mode = s.inputType == CameraSettings::IMAGE_LIST ? CAPTURING : DETECTION;
+	}
+
+
 	vector<vector<Point2f> > imagePoints;
 	Size imageSize;
-	int mode = s.inputType == CameraSettings::IMAGE_LIST ? CAPTURING : DETECTION;
+
 	clock_t prevTimestamp = 0;
 	const Scalar RED(0, 0, 255), GREEN(0, 255, 0);
 	const char ESC_KEY = 27;
