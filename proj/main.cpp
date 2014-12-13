@@ -524,7 +524,7 @@ int main(int argc, char* argv[])
 		binarizeImage(view, dst);
 		imshow("Binary", dst);
 		vector<KeyPoint> keyPoints;
-		findBlobs(view, keyPoints);
+		findBlobs(view, keyPoints, s.cameraMatrix, s.distCoeffs);
 	}
 
 	// -----------------------Show the undistorted image for the image list ------------------------

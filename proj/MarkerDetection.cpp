@@ -39,7 +39,7 @@ void verifySeedPoint(int &x, int &y, Mat img){
 
 
 
-void findBlobs(Mat img, vector<KeyPoint> &keyPoints){
+void findBlobs(Mat img, vector<KeyPoint> &keyPoints, const Mat K, const Mat distCoef){
 	Mat out, binary, mask;
 
 	binarizeImage(img, binary);
@@ -63,7 +63,7 @@ void findBlobs(Mat img, vector<KeyPoint> &keyPoints){
 
 			floodFill(binary, mask, Point(x,y), 255, 0, Scalar(), Scalar(), 4+(255<<8)+FLOODFILL_MASK_ONLY);	
 		}
-		findBlobsContours(mask,binary);
+		findBlobsContours(mask,binary, K, distCoef);
 	}
 }
 
@@ -122,7 +122,7 @@ void getSize(Point v1, Point v2, Point v3, Point v4, int &height, int &width){
 	width = maxDy;
 }
 
-void findBlobsContours(Mat img, Mat colorImage){
+void findBlobsContours(Mat img, Mat colorImage, const Mat K, const Mat distCoef){
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
 
@@ -157,10 +157,12 @@ void findBlobsContours(Mat img, Mat colorImage){
 			( widthElement < img.size().width * 0.9 || heightElement < img.size().height * 0.9) &&
 			( widthElement* heightElement > 64*64 )){
 
+			/*
 			line(dst,vertice1,vertice3,Scalar(255,0,0),1); //Rect1
 			line(dst,vertice1,vertice4,Scalar(0,0,255),1); //Rect2
 			line(dst,vertice2,vertice4,Scalar(255,0,0),1); //Rect3
 			line(dst,vertice2,vertice3,Scalar(0,0,255),1); //Rect4
+			*/
 
 			vector<Point2f> srcPoints;
 			srcPoints.push_back(vertice2);
@@ -168,7 +170,7 @@ void findBlobsContours(Mat img, Mat colorImage){
 			srcPoints.push_back(vertice1);
 			srcPoints.push_back(vertice3);
 
-			matchPoints(srcPoints,colorImage,i,dst);
+			matchPoints(srcPoints,colorImage,dst,K, distCoef);
 		}
 	}
 	
