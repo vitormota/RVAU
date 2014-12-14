@@ -4,6 +4,7 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
+#include <opencv\cv.h>
 
 using namespace cv;
 using namespace std;
@@ -79,10 +80,10 @@ void initMarkerDatabase(){
 }
 
 void matchPoints(vector<Point2f> points, Mat colorImage, Mat dst, const Mat K, const Mat distCoef){
-	Mat homo = findHomography(points, dstPoints);
+	Mat homo = findHomography(points, dstPoints, CV_RANSAC);
 	Mat warpHomo;
 
-	warpPerspective(colorImage, warpHomo, homo, Size(MARKER_SIZE, MARKER_SIZE));
+	warpPerspective(colorImage, warpHomo, homo, Size(MARKER_SIZE, MARKER_SIZE),INTER_LINEAR);
 	Mat compare;
 
 	int maxDiff = MARKER_SIZE*MARKER_SIZE*(1 - ERROR_ALLOWED);
@@ -92,6 +93,7 @@ void matchPoints(vector<Point2f> points, Mat colorImage, Mat dst, const Mat K, c
 	for (int m = 0; m < mSize; m++){
 
 		bitwise_xor(warpHomo, markers[m], compare);
+
 		//int white = 0;
 		for (int y = 0; y < compare.size().height; y++){
 			for (int x = 0; x < compare.size().width; x++){
@@ -113,19 +115,32 @@ void matchPoints(vector<Point2f> points, Mat colorImage, Mat dst, const Mat K, c
 			solvePnP(markerPoints[m], points, K, distCoef, rvec, tvec);
 
 			vector<Point3f> input;
-			input.push_back(Point3f(0, 0, 0)); input.push_back(Point3f(MARKER_SIZE, 0, 0)); input.push_back(Point3f(MARKER_SIZE, MARKER_SIZE, 0)); input.push_back(Point3f(0, MARKER_SIZE, 0));
-			input.push_back(Point3f(0, 0, -MARKER_SIZE)); input.push_back(Point3f(MARKER_SIZE, 0, -MARKER_SIZE)); input.push_back(Point3f(MARKER_SIZE, MARKER_SIZE, -MARKER_SIZE)); input.push_back(Point3f(0, MARKER_SIZE, -MARKER_SIZE));
+
+			{
+				input.push_back(Point3f(0, 0, 0));
+				input.push_back(Point3f(MARKER_SIZE, 0, 0));
+				input.push_back(Point3f(MARKER_SIZE, MARKER_SIZE, 0));
+				input.push_back(Point3f(0, MARKER_SIZE, 0));
+				input.push_back(Point3f(0, 0, -MARKER_SIZE));
+				input.push_back(Point3f(MARKER_SIZE, 0, -MARKER_SIZE));
+				input.push_back(Point3f(MARKER_SIZE, MARKER_SIZE, -MARKER_SIZE));
+				input.push_back(Point3f(0, MARKER_SIZE, -MARKER_SIZE));
+			}
+
 
 			vector<Point2f> imgPoints;
 			projectPoints(input, rvec, tvec, K, distCoef, imgPoints);
 
 			DrawingObject obj(imgPoints);
 			obj.draw(dst);
+			obj.draw(colorImage);
 
 			imshow("Homo", warpHomo);
+
 			break;
 		}
 
 	}
-	imshow("points", dst);
+	imshow("cube", dst);
+	imshow("blend", colorImage);
 }
