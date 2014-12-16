@@ -167,6 +167,7 @@ public:
 			l.push_back((string)*it);
 		return true;
 	}
+
 public:
 	Size boardSize;            // The size of the board -> Number of items by width and height
 	Pattern calibrationPattern;// One of the Chessboard, circles, or asymmetric circle pattern
@@ -394,11 +395,11 @@ int main(int argc, char* argv[])
 	fs["Settings"] >> s;
 	fs.release();                                         // close Settings file
 
-	if (!s.goodInput)
+	/*if (!s.goodInput)
 	{
-		cout << "Invalid input detected. Application stopping. " << endl;
-		return -1;
-	}
+	cout << "Invalid input detected. Application stopping. " << endl;
+	return -1;
+	}*/
 
 	const string parameterSettingsFile = argc > 2 ? argv[2] : "camera_params.xml";
 	FileStorage ps(parameterSettingsFile, FileStorage::READ);
