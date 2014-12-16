@@ -11,6 +11,7 @@ using namespace std;
 vector<Mat> markers;
 vector<Point2f> dstPoints;
 vector<vector<Point3f>> markerPoints;
+vector<Point3f> objectPoints;
 
 void initMarkerDatabase(){
 	markers.push_back(imread("marca1.png",CV_LOAD_IMAGE_GRAYSCALE));
@@ -75,6 +76,9 @@ void initMarkerDatabase(){
 	dstPoints.push_back(Point2f(MARKER_SIZE,0));
 	dstPoints.push_back(Point2f(MARKER_SIZE,MARKER_SIZE));
 	dstPoints.push_back(Point2f(0,MARKER_SIZE));
+
+	objectPoints.push_back(Point3f(0,0,0)); objectPoints.push_back(Point3f(MARKER_SIZE,0,0)); objectPoints.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,0)); objectPoints.push_back(Point3f(0,MARKER_SIZE,0));
+	objectPoints.push_back(Point3f(0,0,-MARKER_SIZE)); objectPoints.push_back(Point3f(MARKER_SIZE,0,-MARKER_SIZE)); objectPoints.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,-MARKER_SIZE)); objectPoints.push_back(Point3f(0,MARKER_SIZE,-MARKER_SIZE));
 }
 
 void matchPoints(vector<Point2f> points, Mat colorImage, Mat dst, const Mat K, const Mat distCoef){
@@ -100,12 +104,10 @@ void matchPoints(vector<Point2f> points, Mat colorImage, Mat dst, const Mat K, c
 			Mat rvec, tvec;
 			solvePnP(markerPoints[m], points, K, distCoef,rvec,tvec);
 
-			vector<Point3f> input;
-			input.push_back(Point3f(0,0,0)); input.push_back(Point3f(MARKER_SIZE,0,0)); input.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,0)); input.push_back(Point3f(0,MARKER_SIZE,0));
-			input.push_back(Point3f(0,0,-MARKER_SIZE)); input.push_back(Point3f(MARKER_SIZE,0,-MARKER_SIZE)); input.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,-MARKER_SIZE)); input.push_back(Point3f(0,MARKER_SIZE,-MARKER_SIZE));
+			
 
 			vector<Point2f> imgPoints;
-			projectPoints(input,rvec,tvec,K,distCoef,imgPoints);
+			projectPoints(objectPoints,rvec,tvec,K,distCoef,imgPoints);
 
 			DrawingObject obj(imgPoints);
 			obj.draw(dst);

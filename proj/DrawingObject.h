@@ -17,7 +17,6 @@ public:
 	void addEdges(std::vector<cv::Point2f> points, cv::Scalar color);
 	void draw(cv::Mat& img);
 
-	static std::vector<cv::Point3f> getCubePoints();
 private:
 	std::vector<PointPair*> edges;
 };

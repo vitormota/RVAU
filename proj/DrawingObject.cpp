@@ -24,16 +24,6 @@ DrawingObject::~DrawingObject(void)
 {
 }
 
-
-std::vector<cv::Point3f> DrawingObject::getCubePoints(){
-	std::vector<cv::Point3f> input;
-
-	input.push_back(cv::Point3f(0,0,0)); input.push_back(cv::Point3f(32,0,0)); input.push_back(cv::Point3f(32,32,0)); input.push_back(cv::Point3f(0,32,0));
-	input.push_back(cv::Point3f(0,0,-32)); input.push_back(cv::Point3f(32,0,-32)); input.push_back(cv::Point3f(32,32,-32)); input.push_back(cv::Point3f(0,32,-32));
-
-	return input;
-}
-
 void DrawingObject::addEdge(cv::Point2f& p1, cv::Point2f& p2, cv::Scalar color){
 	PointPair* edge = new PointPair;
 	edge->left = &p1;
