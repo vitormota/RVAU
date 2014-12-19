@@ -109,22 +109,35 @@ void initMarkerDatabase(){
 	objectPoints.push_back(objectPoints4);
 }
 
+Point3f multiplyVectors(Point3f v1, Point3f v2){
+	Point3f result;
+
+	result.x = v1.x*v2.x;
+	result.y = v1.y*v2.y;
+	result.z = v1.z*v2.z;
+
+	return result;
+}
+
 vector<Point3f> applyTransformation(vector<Point3f> object){
 	vector<Point3f> transformed;
 
-	Point3f scale;
+	Point3f scale, translation;
 
-	scale.x=0.5;
-	scale.y=0.5;
-	scale.z=0.5;
+	scale.x=1;
+	scale.y=1;
+	scale.z=1;
+
+	translation.x = 0;
+	translation.y = 0;
+	translation.z = 0;
 
 	for(int i=0; i<object.size();i++){
 
-		Point3f transformedPoint;
-
-		transformedPoint.x = object[i].x * scale.x;
-		transformedPoint.y = object[i].y * scale.y;
-		transformedPoint.z = object[i].z * scale.z;
+		Point3f transformedPoint = multiplyVectors(object[i],scale);
+		transformedPoint.x = transformedPoint.x + translation.x;
+		transformedPoint.y = transformedPoint.y + translation.y;
+		transformedPoint.z = transformedPoint.z + translation.z;
 
 		transformed.push_back(transformedPoint);
 	}
