@@ -14,6 +14,26 @@ vector<Point2f> dstPoints;
 vector<vector<Point3f>> markerPoints;
 vector<vector<Point3f>> objectPoints;
 const int MAX_ONES = MARKER_SIZE*MARKER_SIZE*ERROR_ALLOWED;
+Point3f scale, translation;
+double rotX = 0, rotY = 0, rotZ = 0;
+
+void setScale(double x, double y, double z){
+	scale.x = x;
+	scale.y = y;
+	scale.z = z;
+}
+
+void setTranslation(double x, double y, double z){
+	translation.x = x;
+	translation.y = y;
+	translation.z = z;
+}
+
+void setRotation(double angleX, double angleY, double angleZ){
+	rotX = angleX;
+	rotY = angleY;
+	rotZ = angleZ;
+}
 
 void initMarkerDatabase(){
 	markers.push_back(imread("marca1.png", CV_LOAD_IMAGE_GRAYSCALE));
@@ -107,6 +127,14 @@ void initMarkerDatabase(){
 	objectPoints.push_back(objectPoints2);
 	objectPoints.push_back(objectPoints3);
 	objectPoints.push_back(objectPoints4);
+
+	scale.x=1;
+	scale.y=1;
+	scale.z=1;
+
+	translation.x = 0;
+	translation.y = 0;
+	translation.z = 0;
 }
 
 Point3f multiplyVectors(Point3f v1, Point3f v2){
@@ -161,17 +189,6 @@ Point3f applyRotation(Point3f v, double rotX, double rotY, double rotZ){
 
 vector<Point3f> applyTransformation(vector<Point3f> object){
 	vector<Point3f> transformed;
-
-	Point3f scale, translation;
-	double rotX = 0, rotY = 0, rotZ = 3.14/4;
-
-	scale.x=1;
-	scale.y=1;
-	scale.z=1;
-
-	translation.x = 0;
-	translation.y = 0;
-	translation.z = 0;
 
 	for(int i=0; i<object.size();i++){
 
