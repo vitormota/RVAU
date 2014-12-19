@@ -131,8 +131,6 @@ void findBlobsContours(Mat img, Mat colorImage, const Mat K, const Mat distCoef)
 	findContours( img, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
 
 	for( int i=0; i < contours.size(); i++ ){
-		//Scalar color( rand()&255, rand()&255, rand()&255 );
-		//drawContours( dst, contours, i, color, 1, 8, hierarchy );
 
 		Point start =contours[i][0], end = contours[i][contours[i].size()/2];
 

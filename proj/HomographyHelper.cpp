@@ -11,7 +11,7 @@ using namespace std;
 
 vector<Mat> markers;
 vector<Point2f> dstPoints;
-vector<vector<Point3f>> markerPoints;
+vector<Point3f> markerPoints;
 vector<vector<Point3f>> objectPoints;
 const int MAX_ONES = MARKER_SIZE*MARKER_SIZE*ERROR_ALLOWED;
 Point3f scale, translation;
@@ -41,58 +41,10 @@ void initMarkerDatabase(){
 	markers.push_back(imread("marca3.png", CV_LOAD_IMAGE_GRAYSCALE));
 	markers.push_back(imread("marca4.png", CV_LOAD_IMAGE_GRAYSCALE));
 
-	vector<Point2f> marker1Points;
-	marker1Points.push_back(Point2f(0, 0));
-	marker1Points.push_back(Point2f(MARKER_SIZE, 0));
-	marker1Points.push_back(Point2f(MARKER_SIZE, MARKER_SIZE));
-	marker1Points.push_back(Point2f(0, MARKER_SIZE));
-
-	vector<Point2f> marker2Points;
-	marker2Points.push_back(Point2f(MARKER_SIZE, 0));
-	marker2Points.push_back(Point2f(MARKER_SIZE, MARKER_SIZE));
-	marker2Points.push_back(Point2f(0, MARKER_SIZE));
-	marker2Points.push_back(Point2f(0, 0));
-
-	vector<Point2f> marker3Points;
-	marker3Points.push_back(Point2f(MARKER_SIZE, MARKER_SIZE));
-	marker3Points.push_back(Point2f(0, MARKER_SIZE));
-	marker3Points.push_back(Point2f(0, 0));
-	marker3Points.push_back(Point2f(MARKER_SIZE, 0));
-
-	vector<Point2f> marker4Points;
-	marker4Points.push_back(Point2f(0, MARKER_SIZE));
-	marker4Points.push_back(Point2f(0, 0));
-	marker4Points.push_back(Point2f(MARKER_SIZE, 0));
-	marker4Points.push_back(Point2f(MARKER_SIZE, MARKER_SIZE));
-
-	vector<Point3f> marker1Points3;
-	marker1Points3.push_back(Point3f(0, 0, 0));
-	marker1Points3.push_back(Point3f(MARKER_SIZE, 0, 0));
-	marker1Points3.push_back(Point3f(MARKER_SIZE, MARKER_SIZE, 0));
-	marker1Points3.push_back(Point3f(0, MARKER_SIZE, 0));
-
-	vector<Point3f> marker2Points3;
-	marker2Points3.push_back(Point3f(MARKER_SIZE, 0, 0));
-	marker2Points3.push_back(Point3f(MARKER_SIZE, MARKER_SIZE, 0));
-	marker2Points3.push_back(Point3f(0, MARKER_SIZE, 0));
-	marker2Points3.push_back(Point3f(0, 0, 0));
-
-	vector<Point3f> marker3Points3;
-	marker3Points3.push_back(Point3f(MARKER_SIZE, MARKER_SIZE, 0));
-	marker3Points3.push_back(Point3f(0, MARKER_SIZE, 0));
-	marker3Points3.push_back(Point3f(0, 0, 0));
-	marker3Points3.push_back(Point3f(MARKER_SIZE, 0, 0));
-
-	vector<Point3f> marker4Points3;
-	marker4Points3.push_back(Point3f(0, MARKER_SIZE, 0));
-	marker4Points3.push_back(Point3f(0, 0, 0));
-	marker4Points3.push_back(Point3f(MARKER_SIZE, 0, 0));
-	marker4Points3.push_back(Point3f(MARKER_SIZE, MARKER_SIZE, 0));
-
-	markerPoints.push_back(marker1Points3);
-	markerPoints.push_back(marker2Points3);
-	markerPoints.push_back(marker3Points3);
-	markerPoints.push_back(marker4Points3);
+	markerPoints.push_back(Point3f(0, 0, 0));
+	markerPoints.push_back(Point3f(MARKER_SIZE, 0, 0));
+	markerPoints.push_back(Point3f(MARKER_SIZE, MARKER_SIZE, 0));
+	markerPoints.push_back(Point3f(0, MARKER_SIZE, 0));
 
 	dstPoints.push_back(Point2f(0,0));
 	dstPoints.push_back(Point2f(MARKER_SIZE,0));
@@ -234,7 +186,7 @@ void matchPoints(vector<Point2f> points, Mat colorImage, Mat dst, const Mat K, c
 			//markerPoints 3D Points in object coordinate space (marker plane)
 			//points are the corresponding points in the image 2D space
 			Mat rvec, tvec;
-			solvePnP(markerPoints[m], points, K, distCoef, rvec, tvec);
+			solvePnP(markerPoints, points, K, distCoef, rvec, tvec);
 
 			//Projects 3D points to an image plane
 			//objectPoints are the 3D points of the object in the object coordinate space (marker plane)
@@ -244,6 +196,7 @@ void matchPoints(vector<Point2f> points, Mat colorImage, Mat dst, const Mat K, c
 			DrawingObject obj(imgPoints);
 			obj.draw(dst);
 			obj.draw(colorImage);
+
 			break;
 		}
 	}
