@@ -13,6 +13,17 @@
 using namespace cv;
 using namespace std;
 
+const string windowName = "View";
+const string trackbarTranslateX = "Translate x";
+const string trackbarTranslateY = "Translate y";
+const string trackbarTranslateZ = "Translate z";
+
+int tX, tY, tZ;
+
+void onTrackbarTranslate(int, void*){
+	setTranslation(tX,tY,tZ);
+}
+
 class CameraSettings
 {
 public:
@@ -534,8 +545,12 @@ int main(int argc, char* argv[])
 			imagePoints.clear();
 		}
 
+		createTrackbar(trackbarTranslateX,windowName,&tX,32, onTrackbarTranslate);
+		createTrackbar(trackbarTranslateY,windowName,&tY,32, onTrackbarTranslate);
+		createTrackbar(trackbarTranslateZ,windowName,&tZ,32, onTrackbarTranslate);
+
 		findBlobs(view, s.cameraMatrix, s.distCoeffs);
-		imshow("View", view);
+		imshow(windowName, view);
 	}
 
 	// -----------------------Show the undistorted image for the image list ------------------------
