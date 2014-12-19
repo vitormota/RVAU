@@ -119,10 +119,51 @@ Point3f multiplyVectors(Point3f v1, Point3f v2){
 	return result;
 }
 
+Point3f rotateX(Point3f v, double angle){
+	Point3f result;
+
+	result.x = v.x;
+	result.y = v.y*cos(angle) - v.z*sin(angle);
+	result.z = v.y*sin(angle) + v.z*cos(angle);
+
+	return result;
+}
+
+Point3f rotateY(Point3f v, double angle){
+	Point3f result;
+
+	result.x = v.x*cos(angle) + v.z*sin(angle);
+	result.y = v.y;
+	result.z = v.z*cos(angle) - v.x*sin(angle);
+
+	return result;
+}
+
+Point3f rotateZ(Point3f v, double angle){
+	Point3f result;
+
+	result.x = v.x*cos(angle) - v.y*sin(angle);
+	result.y = v.x*sin(angle) + v.y*cos(angle);
+	result.z = v.z;
+
+	return result;
+}
+
+Point3f applyRotation(Point3f v, double rotX, double rotY, double rotZ){
+	Point3f result;
+
+	result = rotateX(v,rotX);
+	result = rotateY(result,rotY);
+	result = rotateZ(result,rotZ);
+
+	return result;
+}
+
 vector<Point3f> applyTransformation(vector<Point3f> object){
 	vector<Point3f> transformed;
 
 	Point3f scale, translation;
+	double rotX = 0, rotY = 0, rotZ = 3.14/4;
 
 	scale.x=1;
 	scale.y=1;
@@ -134,7 +175,10 @@ vector<Point3f> applyTransformation(vector<Point3f> object){
 
 	for(int i=0; i<object.size();i++){
 
-		Point3f transformedPoint = multiplyVectors(object[i],scale);
+		Point3f transformedPoint = applyRotation(transformedPoint,rotX,rotY,rotZ);
+
+		transformedPoint = multiplyVectors(object[i],scale);
+
 		transformedPoint.x = transformedPoint.x + translation.x;
 		transformedPoint.y = transformedPoint.y + translation.y;
 		transformedPoint.z = transformedPoint.z + translation.z;
