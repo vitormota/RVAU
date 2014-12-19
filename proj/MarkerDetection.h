@@ -10,6 +10,6 @@
 #define FLOODFILL_ITERATIONS 5
 
 void binarizeImage(cv::Mat img, cv::Mat &dst);
-void findBlobs(cv::Mat img, std::vector<cv::KeyPoint> &keyPoints, const cv::Mat K, const cv::Mat distCoef);
-void findBlobsContours(cv::Mat img, cv::Mat colorImage, const cv::Mat K, const cv::Mat distCoef);
+void findBlobs(cv::Mat &img, const cv::Mat K, const cv::Mat distCoef);
+void findBlobsContours(cv::Mat img, cv::Mat binImage, cv::Mat &colorImage, const cv::Mat K, const cv::Mat distCoef);
 void initMarkerDatabase();

@@ -158,14 +158,14 @@ vector<Point3f> applyTransformation(vector<Point3f> object){
 	return transformed;
 }
 
-void matchPoints(vector<Point2f> points, Mat colorImage, Mat dst, const Mat K, const Mat distCoef){
+void matchPoints(vector<Point2f> points, Mat binImage, Mat &dst, const Mat K, const Mat distCoef){
 
 	//Calculate homography between the image plane and the marker plane
 	Mat homo = findHomography(points, dstPoints);
 
 	//Transform the image to the marker plane: frontal view with size 32x32
 	Mat warpHomo;
-	warpPerspective(colorImage, warpHomo, homo, Size(MARKER_SIZE, MARKER_SIZE),INTER_LINEAR);
+	warpPerspective(binImage, warpHomo, homo, Size(MARKER_SIZE, MARKER_SIZE),INTER_LINEAR);
 
 	Mat compare;
 	int count;
@@ -195,11 +195,8 @@ void matchPoints(vector<Point2f> points, Mat colorImage, Mat dst, const Mat K, c
 
 			DrawingObject obj(imgPoints);
 			obj.draw(dst);
-			obj.draw(colorImage);
 
 			break;
 		}
 	}
-	imshow("cube", dst);
-	imshow("blend", colorImage);
 }

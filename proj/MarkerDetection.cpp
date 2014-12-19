@@ -39,8 +39,10 @@ void verifySeedPoint(int &x, int &y, Mat img){
 
 
 
-void findBlobs(Mat img, vector<KeyPoint> &keyPoints, const Mat K, const Mat distCoef){
+void findBlobs(Mat &img, const Mat K, const Mat distCoef){
 	Mat out, binary, mask;
+
+	vector<KeyPoint> keyPoints;
 
 	binarizeImage(img, binary);
 
@@ -48,7 +50,6 @@ void findBlobs(Mat img, vector<KeyPoint> &keyPoints, const Mat K, const Mat dist
 
 	detector.detect( binary, keyPoints );
 	drawKeypoints( img, keyPoints, out, CV_RGB(0,255,0), DrawMatchesFlags::DEFAULT);
-	imshow("keypoints", out);
 
 	for( int i=0; i < keyPoints.size(); i++){
 		KeyPoint keyPoint = keyPoints.at(i);
@@ -63,7 +64,7 @@ void findBlobs(Mat img, vector<KeyPoint> &keyPoints, const Mat K, const Mat dist
 
 			floodFill(binary, mask, Point(x,y), 255, 0, Scalar(), Scalar(), 4+(255<<8)+FLOODFILL_MASK_ONLY);	
 		}
-		findBlobsContours(mask,binary, K, distCoef);
+		findBlobsContours(mask,binary, img, K, distCoef);
 	}
 }
 
@@ -122,11 +123,9 @@ void getSize(Point v1, Point v2, Point v3, Point v4, int &height, int &width){
 	width = maxDy;
 }
 
-void findBlobsContours(Mat img, Mat colorImage, const Mat K, const Mat distCoef){
+void findBlobsContours(Mat img, Mat binImage, Mat &colorImage, const Mat K, const Mat distCoef){
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
-
-	Mat dst = Mat::zeros(img.rows, img.cols, CV_8UC3);
 
 	findContours( img, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
 
@@ -161,10 +160,9 @@ void findBlobsContours(Mat img, Mat colorImage, const Mat K, const Mat distCoef)
 			srcPoints.push_back(vertice1);
 			srcPoints.push_back(vertice3);
 
-			matchPoints(srcPoints,colorImage,dst,K, distCoef);
+			matchPoints(srcPoints,binImage,colorImage,K, distCoef);
 		}
 	}
-	
 }
 
 SimpleBlobDetector::Params getBlobDetectorParams(){
