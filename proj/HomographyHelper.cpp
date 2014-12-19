@@ -12,7 +12,8 @@ using namespace std;
 vector<Mat> markers;
 vector<Point2f> dstPoints;
 vector<vector<Point3f>> markerPoints;
-vector<Point3f> objectPoints;
+vector<vector<Point3f>> objectPoints;
+const int MAX_ONES = MARKER_SIZE*MARKER_SIZE*ERROR_ALLOWED;
 
 void initMarkerDatabase(){
 	markers.push_back(imread("marca1.png", CV_LOAD_IMAGE_GRAYSCALE));
@@ -78,52 +79,99 @@ void initMarkerDatabase(){
 	dstPoints.push_back(Point2f(MARKER_SIZE,MARKER_SIZE));
 	dstPoints.push_back(Point2f(0,MARKER_SIZE));
 
-	objectPoints.push_back(Point3f(0,0,0)); objectPoints.push_back(Point3f(MARKER_SIZE,0,0)); objectPoints.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,0)); objectPoints.push_back(Point3f(0,MARKER_SIZE,0));
-	objectPoints.push_back(Point3f(0,0,-MARKER_SIZE)); objectPoints.push_back(Point3f(MARKER_SIZE,0,-MARKER_SIZE)); objectPoints.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,-MARKER_SIZE)); objectPoints.push_back(Point3f(0,MARKER_SIZE,-MARKER_SIZE));
+	vector<Point3f> objectPoints1;
+	objectPoints1.push_back(Point3f(0,0,0)); objectPoints1.push_back(Point3f(MARKER_SIZE,0,0)); 
+	objectPoints1.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,0)); objectPoints1.push_back(Point3f(0,MARKER_SIZE,0));
+	objectPoints1.push_back(Point3f(0,0,-MARKER_SIZE)); objectPoints1.push_back(Point3f(MARKER_SIZE,0,-MARKER_SIZE)); 
+	objectPoints1.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,-MARKER_SIZE)); objectPoints1.push_back(Point3f(0,MARKER_SIZE,-MARKER_SIZE));
+
+	vector<Point3f> objectPoints2;
+	objectPoints2.push_back(Point3f(MARKER_SIZE,0,0)); objectPoints2.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,0));
+	objectPoints2.push_back(Point3f(0,MARKER_SIZE,0)); objectPoints2.push_back(Point3f(0,0,0)); 
+	objectPoints2.push_back(Point3f(MARKER_SIZE,0,-MARKER_SIZE)); objectPoints2.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,-MARKER_SIZE)); 
+	objectPoints2.push_back(Point3f(0,MARKER_SIZE,-MARKER_SIZE)); objectPoints2.push_back(Point3f(0,0,-MARKER_SIZE));
+
+	vector<Point3f> objectPoints3;
+	objectPoints3.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,0)); objectPoints3.push_back(Point3f(0,MARKER_SIZE,0)); 
+	objectPoints3.push_back(Point3f(0,0,0)); objectPoints3.push_back(Point3f(MARKER_SIZE,0,0)); 
+	objectPoints3.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,-MARKER_SIZE)); objectPoints3.push_back(Point3f(0,MARKER_SIZE,-MARKER_SIZE)); 
+	objectPoints3.push_back(Point3f(0,0,-MARKER_SIZE)); objectPoints3.push_back(Point3f(MARKER_SIZE,0,-MARKER_SIZE)); 
+
+	vector<Point3f> objectPoints4;
+	objectPoints4.push_back(Point3f(0,MARKER_SIZE,0)); objectPoints4.push_back(Point3f(0,0,0)); 
+	objectPoints4.push_back(Point3f(MARKER_SIZE,0,0)); objectPoints4.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,0)); 
+	objectPoints4.push_back(Point3f(0,MARKER_SIZE,-MARKER_SIZE)); objectPoints4.push_back(Point3f(0,0,-MARKER_SIZE));
+	objectPoints4.push_back(Point3f(MARKER_SIZE,0,-MARKER_SIZE)); objectPoints4.push_back(Point3f(MARKER_SIZE,MARKER_SIZE,-MARKER_SIZE)); 
+
+	objectPoints.push_back(objectPoints1);
+	objectPoints.push_back(objectPoints2);
+	objectPoints.push_back(objectPoints3);
+	objectPoints.push_back(objectPoints4);
+}
+
+vector<Point3f> applyTransformation(vector<Point3f> object){
+	vector<Point3f> transformed;
+
+	Point3f scale;
+
+	scale.x=0.5;
+	scale.y=0.5;
+	scale.z=0.5;
+
+	for(int i=0; i<object.size();i++){
+
+		Point3f transformedPoint;
+
+		transformedPoint.x = object[i].x * scale.x;
+		transformedPoint.y = object[i].y * scale.y;
+		transformedPoint.z = object[i].z * scale.z;
+
+		transformed.push_back(transformedPoint);
+	}
+
+	return transformed;
 }
 
 void matchPoints(vector<Point2f> points, Mat colorImage, Mat dst, const Mat K, const Mat distCoef){
-	Mat homo = findHomography(points, dstPoints, CV_RANSAC);
+
+	//Calculate homography between the image plane and the marker plane
+	Mat homo = findHomography(points, dstPoints);
+
+	//Transform the image to the marker plane: frontal view with size 32x32
 	Mat warpHomo;
-
 	warpPerspective(colorImage, warpHomo, homo, Size(MARKER_SIZE, MARKER_SIZE),INTER_LINEAR);
+
 	Mat compare;
+	int count;
 
-	int maxDiff = MARKER_SIZE*MARKER_SIZE*(1 - ERROR_ALLOWED);
-	int count = maxDiff;
-	int mSize = markers.size();
-
-	for (int m = 0; m < mSize; m++){
-
+	//Iterate through all elements of markers vector to compare with all markers in all orientations
+	for (int m = 0; m < markers.size(); m++){
+		//Compare the image with the marker in the database resulting in a map of 0's and 1's
+		//0's mean different pixels
+		//1's mean similar pixels
 		bitwise_xor(warpHomo, markers[m], compare);
 
-		for (int y = 0; y < compare.size().height; y++){
-			for (int x = 0; x < compare.size().width; x++){
-				if (compare.at<uchar>(y, x) != 0){
-					count--;
-				}
-				if (!count) break;
-			}
-		}
+		count = countNonZero(compare);
 
-		//90% dos pixels iguais
-		if (!count) count = maxDiff;
-		else if (count){
+		//If it has a sufficient number of similar pixels
+		if (count < MAX_ONES){
+
+			//Finds the object pose from 3D-2D point correspondences [rvec|tvec] extrinsic parameters
+			//markerPoints 3D Points in object coordinate space (marker plane)
+			//points are the corresponding points in the image 2D space
 			Mat rvec, tvec;
 			solvePnP(markerPoints[m], points, K, distCoef, rvec, tvec);
 
+			//Projects 3D points to an image plane
+			//objectPoints are the 3D points of the object in the object coordinate space (marker plane)
 			vector<Point2f> imgPoints;
-			projectPoints(objectPoints,rvec,tvec,K,distCoef,imgPoints);
+			projectPoints(applyTransformation(objectPoints[m]),rvec,tvec,K,distCoef,imgPoints);
 
 			DrawingObject obj(imgPoints);
 			obj.draw(dst);
 			obj.draw(colorImage);
-
-			imshow("Homo", warpHomo);
-
 			break;
 		}
-
 	}
 	imshow("cube", dst);
 	imshow("blend", colorImage);

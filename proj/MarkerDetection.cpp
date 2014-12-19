@@ -157,13 +157,6 @@ void findBlobsContours(Mat img, Mat colorImage, const Mat K, const Mat distCoef)
 			( widthElement < img.size().width * 0.9 || heightElement < img.size().height * 0.9) &&
 			( widthElement* heightElement > 64*64 )){
 
-			/*
-			line(dst,vertice1,vertice3,Scalar(255,0,0),1); //Rect1
-			line(dst,vertice1,vertice4,Scalar(0,0,255),1); //Rect2
-			line(dst,vertice2,vertice4,Scalar(255,0,0),1); //Rect3
-			line(dst,vertice2,vertice3,Scalar(0,0,255),1); //Rect4
-			*/
-
 			vector<Point2f> srcPoints;
 			srcPoints.push_back(vertice2);
 			srcPoints.push_back(vertice4);
