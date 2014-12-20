@@ -175,7 +175,7 @@ void matchPoints(vector<Point2f> points, Mat binImage, Mat &dst, const Mat K, co
 		//Compare the image with the marker in the database resulting in a map of 0's and 1's
 		//0's mean different pixels
 		//1's mean similar pixels
-		bitwise_xor(warpHomo, markers[m], compare);
+		bitwise_xor(warpHomo, markers[m % 4], compare);
 
 		count = countNonZero(compare);
 
@@ -191,7 +191,7 @@ void matchPoints(vector<Point2f> points, Mat binImage, Mat &dst, const Mat K, co
 			//Projects 3D points to an image plane
 			//objectPoints are the 3D points of the object in the object coordinate space (marker plane)
 			vector<Point2f> imgPoints;
-			projectPoints(applyTransformation(objectPoints[m]),rvec,tvec,K,distCoef,imgPoints);
+			projectPoints(applyTransformation(objectPoints[m % 4]),rvec,tvec,K,distCoef,imgPoints);
 
 			DrawingObject obj(imgPoints);
 			obj.draw(dst);
