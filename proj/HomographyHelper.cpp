@@ -144,9 +144,9 @@ vector<Point3f> applyTransformation(vector<Point3f> object){
 
 	for(int i=0; i<object.size();i++){
 
-		Point3f transformedPoint = applyRotation(transformedPoint,rotX,rotY,rotZ);
+		Point3f transformedPoint = applyRotation(object[i],rotX,rotY,rotZ);
 
-		transformedPoint = multiplyVectors(object[i],scale);
+		transformedPoint = multiplyVectors(transformedPoint,scale);
 
 		transformedPoint.x = transformedPoint.x + translation.x;
 		transformedPoint.y = transformedPoint.y + translation.y;

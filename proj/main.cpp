@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+
 #include "MarkerDetection.h"
 #include "BlobDetection.h"
 #include "HomographyHelper.h"
@@ -9,19 +11,43 @@
 #include <time.h>
 #include <stdio.h>
 #include <iostream>
+#include <math.h>
 
 using namespace cv;
 using namespace std;
 
 const string windowName = "View";
+const string trackbarName = "Parameters";
 const string trackbarTranslateX = "Translate x";
 const string trackbarTranslateY = "Translate y";
 const string trackbarTranslateZ = "Translate z";
+const string trackbarScaleX = "Scale x";
+const string trackbarScaleY = "Scale y";
+const string trackbarScaleZ = "Scale z";
+const string trackbarRotateX = "Rotate x";
+const string trackbarRotateY = "Rotate y";
+const string trackbarRotateZ = "Rotate z";
 
-int tX, tY, tZ;
+Mat trackbar = Mat::zeros(10,512,CV_8U);
+
+int tX=0, tY=0, tZ=0;
+int sX =100, sY=100, sZ=100;
+int rX=0, rY=0, rZ=0;
 
 void onTrackbarTranslate(int, void*){
 	setTranslation(tX,tY,tZ);
+}
+
+void onTrackbarScale(int, void*){
+	setScale((double)sX / 100, (double)sY / 100, (double)sZ / 100);
+}
+
+void onTrackbarRotate(int, void*){
+	double radX = M_PI * (double)rX / 180.0;
+	double radY = M_PI * (double)rY / 180.0;
+	double radZ = M_PI * (double)rZ / 180.0;
+
+	setRotation(radX,radY,radZ);
 }
 
 class CameraSettings
@@ -223,10 +249,10 @@ enum { DETECTION = 0, CAPTURING = 1, CALIBRATED = 2 };
 
 
 static double computeReprojectionErrors(const vector<vector<Point3f> >& objectPoints,
-	const vector<vector<Point2f> >& imagePoints,
-	const vector<Mat>& rvecs, const vector<Mat>& tvecs,
-	const Mat& cameraMatrix, const Mat& distCoeffs,
-	vector<float>& perViewErrors)
+										const vector<vector<Point2f> >& imagePoints,
+										const vector<Mat>& rvecs, const vector<Mat>& tvecs,
+										const Mat& cameraMatrix, const Mat& distCoeffs,
+										vector<float>& perViewErrors)
 {
 	vector<Point2f> imagePoints2;
 	int i, totalPoints = 0;
@@ -249,7 +275,7 @@ static double computeReprojectionErrors(const vector<vector<Point3f> >& objectPo
 }
 
 static void calcBoardCornerPositions(Size boardSize, float squareSize, vector<Point3f>& corners,
-	CameraSettings::Pattern patternType /*= Settings::CHESSBOARD*/)
+									 CameraSettings::Pattern patternType /*= Settings::CHESSBOARD*/)
 {
 	corners.clear();
 
@@ -273,8 +299,8 @@ static void calcBoardCornerPositions(Size boardSize, float squareSize, vector<Po
 }
 
 static bool runCalibration(CameraSettings& s, Size& imageSize, Mat& cameraMatrix, Mat& distCoeffs,
-	vector<vector<Point2f> > imagePoints, vector<Mat>& rvecs, vector<Mat>& tvecs,
-	vector<float>& reprojErrs, double& totalAvgErr)
+						   vector<vector<Point2f> > imagePoints, vector<Mat>& rvecs, vector<Mat>& tvecs,
+						   vector<float>& reprojErrs, double& totalAvgErr)
 {
 
 	cameraMatrix = Mat::eye(3, 3, CV_64F);
@@ -304,9 +330,9 @@ static bool runCalibration(CameraSettings& s, Size& imageSize, Mat& cameraMatrix
 
 // Print camera parameters to the output file
 static void saveCameraParams(CameraSettings& s, Size& imageSize, Mat& cameraMatrix, Mat& distCoeffs,
-	const vector<Mat>& rvecs, const vector<Mat>& tvecs,
-	const vector<float>& reprojErrs, const vector<vector<Point2f> >& imagePoints,
-	double totalAvgErr)
+							 const vector<Mat>& rvecs, const vector<Mat>& tvecs,
+							 const vector<float>& reprojErrs, const vector<vector<Point2f> >& imagePoints,
+							 double totalAvgErr)
 {
 	FileStorage fs(s.outputFileName, FileStorage::WRITE);
 	char buf[1024];
@@ -394,6 +420,21 @@ bool runCalibrationAndSave(CameraSettings& s, Size imageSize, Mat&  cameraMatrix
 int main(int argc, char* argv[])
 {
 	initMarkerDatabase();
+
+	imshow(trackbarName,trackbar);
+
+	createTrackbar(trackbarTranslateX,trackbarName,&tX,32, onTrackbarTranslate);
+	createTrackbar(trackbarTranslateY,trackbarName,&tY,32, onTrackbarTranslate);
+	createTrackbar(trackbarTranslateZ,trackbarName,&tZ,32, onTrackbarTranslate);
+
+	createTrackbar(trackbarScaleX,trackbarName,&sX,200, onTrackbarScale);
+	createTrackbar(trackbarScaleY,trackbarName,&sY,200, onTrackbarScale);
+	createTrackbar(trackbarScaleZ,trackbarName,&sZ,200, onTrackbarScale);
+
+	createTrackbar(trackbarRotateX,trackbarName,&rX,360, onTrackbarRotate);
+	createTrackbar(trackbarRotateY,trackbarName,&rY,360, onTrackbarRotate);
+	createTrackbar(trackbarRotateZ,trackbarName,&rZ,360, onTrackbarRotate);
+
 	CameraSettings s;
 	int mode;
 	const string inputSettingsFile = argc > 1 ? argv[1] : "default.xml";
@@ -545,12 +586,9 @@ int main(int argc, char* argv[])
 			imagePoints.clear();
 		}
 
-		createTrackbar(trackbarTranslateX,windowName,&tX,32, onTrackbarTranslate);
-		createTrackbar(trackbarTranslateY,windowName,&tY,32, onTrackbarTranslate);
-		createTrackbar(trackbarTranslateZ,windowName,&tZ,32, onTrackbarTranslate);
-
 		findBlobs(view, s.cameraMatrix, s.distCoeffs);
 		imshow(windowName, view);
+
 	}
 
 	// -----------------------Show the undistorted image for the image list ------------------------
