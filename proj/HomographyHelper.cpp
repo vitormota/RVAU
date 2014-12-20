@@ -40,6 +40,14 @@ void initMarkerDatabase(){
 	markers.push_back(imread("marca2.png", CV_LOAD_IMAGE_GRAYSCALE));
 	markers.push_back(imread("marca3.png", CV_LOAD_IMAGE_GRAYSCALE));
 	markers.push_back(imread("marca4.png", CV_LOAD_IMAGE_GRAYSCALE));
+	markers.push_back(imread("kanji1.png", CV_LOAD_IMAGE_GRAYSCALE));
+	markers.push_back(imread("kanji2.png", CV_LOAD_IMAGE_GRAYSCALE));
+	markers.push_back(imread("kanji3.png", CV_LOAD_IMAGE_GRAYSCALE));
+	markers.push_back(imread("kanji4.png", CV_LOAD_IMAGE_GRAYSCALE));
+	markers.push_back(imread("m1.png", CV_LOAD_IMAGE_GRAYSCALE));
+	markers.push_back(imread("m2.png", CV_LOAD_IMAGE_GRAYSCALE));
+	markers.push_back(imread("m3.png", CV_LOAD_IMAGE_GRAYSCALE));
+	markers.push_back(imread("m4.png", CV_LOAD_IMAGE_GRAYSCALE));
 
 	markerPoints.push_back(Point3f(0, 0, 0));
 	markerPoints.push_back(Point3f(MARKER_SIZE, 0, 0));
@@ -175,7 +183,7 @@ void matchPoints(vector<Point2f> points, Mat binImage, Mat &dst, const Mat K, co
 		//Compare the image with the marker in the database resulting in a map of 0's and 1's
 		//0's mean different pixels
 		//1's mean similar pixels
-		bitwise_xor(warpHomo, markers[m % 4], compare);
+		bitwise_xor(warpHomo, markers[m], compare);
 
 		count = countNonZero(compare);
 

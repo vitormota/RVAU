@@ -1,7 +1,7 @@
 #include <opencv2/core/core.hpp>
 
 #define MARKER_SIZE 32
-#define ERROR_ALLOWED 0.1
+#define ERROR_ALLOWED 0.15
 
 void cameraPoseFromHomography(const cv::Mat& H, cv::Mat& pose, const cv::Mat K);
 void initMarkerDatabase();
