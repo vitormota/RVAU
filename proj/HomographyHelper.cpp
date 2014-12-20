@@ -4,6 +4,7 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
+#include <omp.h>
 
 using namespace cv;
 using namespace std;
@@ -175,11 +176,15 @@ void matchPoints(vector<Point2f> points, Mat binImage, Mat &dst, const Mat K, co
 	Mat warpHomo;
 	warpPerspective(binImage, warpHomo, homo, Size(MARKER_SIZE, MARKER_SIZE),INTER_LINEAR);
 
-	Mat compare;
-	int count;
+	
 
 	//Iterate through all elements of markers vector to compare with all markers in all orientations
+	#pragma omp parallel for
 	for (int m = 0; m < markers.size(); m++){
+
+		Mat compare;
+		int count;
+
 		//Compare the image with the marker in the database resulting in a map of 0's and 1's
 		//0's mean different pixels
 		//1's mean similar pixels
@@ -203,8 +208,6 @@ void matchPoints(vector<Point2f> points, Mat binImage, Mat &dst, const Mat K, co
 
 			DrawingObject obj(imgPoints);
 			obj.draw(dst);
-
-			break;
 		}
 	}
 }
