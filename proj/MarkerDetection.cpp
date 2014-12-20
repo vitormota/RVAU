@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cfloat>
 #include <opencv2/highgui/highgui.hpp>
+#include <omp.h>
 
 using namespace std;
 using namespace cv;
@@ -11,7 +12,7 @@ SimpleBlobDetector::Params getBlobDetectorParams();
 
 #define PI 3.14159265
 
-//5 degrees
+//10 degrees
 const double errorDegree = 10 * PI / 180;
 
 
@@ -40,21 +41,20 @@ void verifySeedPoint(int &x, int &y, Mat img){
 
 
 void findBlobs(Mat &img, const Mat K, const Mat distCoef){
-	Mat out, binary, mask;
+	Mat binary;
 
 	vector<KeyPoint> keyPoints;
 
 	binarizeImage(img, binary);
 
 	SimpleBlobDetector detector(getBlobDetectorParams());
-
 	detector.detect( binary, keyPoints );
-	drawKeypoints( img, keyPoints, out, CV_RGB(0,255,0), DrawMatchesFlags::DEFAULT);
 
+	#pragma omp parallel for
 	for( int i=0; i < keyPoints.size(); i++){
 		KeyPoint keyPoint = keyPoints.at(i);
 
-		mask = Mat::zeros(binary.rows+2, binary.cols+2,CV_8U);	
+		Mat mask = Mat::zeros(binary.rows+2, binary.cols+2,CV_8U);	
 
 		for( int j=0; j < FLOODFILL_ITERATIONS; j++){
 			int x = keyPoint.pt.x + (rand() % (int)keyPoint.size * PERCENTAGE_SIZE) - (keyPoint.size * PERCENTAGE_SIZE / 2 );
@@ -129,6 +129,7 @@ void findBlobsContours(Mat img, Mat binImage, Mat &colorImage, const Mat K, cons
 
 	findContours( img, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
 
+	#pragma omp parallel for
 	for( int i=0; i < contours.size(); i++ ){
 
 		Point start =contours[i][0], end = contours[i][contours[i].size()/2];

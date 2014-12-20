@@ -10,7 +10,7 @@ struct PointPair{
 class DrawingObject
 {
 public:
-	DrawingObject(std::vector<cv::Point2f>& points);
+	DrawingObject(std::vector<cv::Point2f>& points, cv::Scalar color);
 	~DrawingObject(void);
 	void addEdge(cv::Point2f& p1, cv::Point2f& p2, cv::Scalar color);
 	void addEdge(PointPair& edge);

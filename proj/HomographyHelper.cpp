@@ -167,6 +167,21 @@ vector<Point3f> applyTransformation(vector<Point3f> object){
 	return transformed;
 }
 
+Scalar getColor(int markerIdx){
+	int m = markerIdx / 4;
+
+	switch(m){
+	case 0:
+		return Scalar(0,0,255);
+	case 1:
+		return Scalar(0,255,0);
+	case 2:
+		return Scalar(255,0,0);
+	default:
+		return Scalar(255,255,255);
+	}
+}
+
 void matchPoints(vector<Point2f> points, Mat binImage, Mat &dst, const Mat K, const Mat distCoef){
 
 	//Calculate homography between the image plane and the marker plane
@@ -206,7 +221,7 @@ void matchPoints(vector<Point2f> points, Mat binImage, Mat &dst, const Mat K, co
 			vector<Point2f> imgPoints;
 			projectPoints(applyTransformation(objectPoints[m % 4]),rvec,tvec,K,distCoef,imgPoints);
 
-			DrawingObject obj(imgPoints);
+			DrawingObject obj(imgPoints, getColor(m));
 			obj.draw(dst);
 		}
 	}
