@@ -1,7 +1,6 @@
 #define _USE_MATH_DEFINES
 
 #include "MarkerDetection.h"
-#include "BlobDetection.h"
 #include "HomographyHelper.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>

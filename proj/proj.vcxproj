@@ -84,15 +84,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="blob.cpp" />
-    <ClCompile Include="BlobDetection.cpp" />
     <ClCompile Include="DrawingObject.cpp" />
     <ClCompile Include="HomographyHelper.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MarkerDetection.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BlobDetection.h" />
     <ClInclude Include="DrawingObject.h" />
     <ClInclude Include="HomographyHelper.h" />
     <ClInclude Include="MarkerDetection.h" />

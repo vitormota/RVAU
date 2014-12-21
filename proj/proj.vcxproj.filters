@@ -21,13 +21,10 @@
     <ClCompile Include="MarkerDetection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="blob.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BlobDetection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HomographyHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawingObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,10 +32,10 @@
     <ClInclude Include="MarkerDetection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BlobDetection.h">
+    <ClInclude Include="HomographyHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HomographyHelper.h">
+    <ClInclude Include="DrawingObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
